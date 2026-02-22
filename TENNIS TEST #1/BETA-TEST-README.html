@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Beta Test #2 — Liveball with Erik</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #141a14; color: #fff; min-height: 100vh; padding: 48px 24px; }
+
+    .wrap { max-width: 640px; margin: 0 auto; }
+
+    .badge { display: inline-block; background: rgba(76,175,80,0.15); color: #4caf50; border: 1px solid rgba(76,175,80,0.3); border-radius: 100px; padding: 5px 14px; font-size: 0.78rem; font-weight: 700; margin-bottom: 20px; letter-spacing: 0.5px; }
+
+    h1 { font-size: 2rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 10px; line-height: 1.15; }
+    h1 span { color: #4caf50; }
+    .intro { color: rgba(255,255,255,0.5); font-size: 0.92rem; line-height: 1.7; margin-bottom: 40px; }
+
+    .section { margin-bottom: 36px; }
+    .section-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #4caf50; margin-bottom: 14px; }
+
+    /* STEPS */
+    .step { display: flex; gap: 16px; margin-bottom: 18px; align-items: flex-start; }
+    .step-num { width: 28px; height: 28px; border-radius: 50%; background: #4caf50; color: #fff; font-size: 0.8rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .step-body { flex: 1; }
+    .step-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .step-desc { font-size: 0.83rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+    .step-desc code { background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px; font-family: monospace; color: #c8e63c; font-size: 0.82rem; }
+
+    /* CREDENTIALS BOX */
+    .creds { background: rgba(76,175,80,0.08); border: 1px solid rgba(76,175,80,0.2); border-radius: 14px; padding: 20px 22px; margin-bottom: 36px; }
+    .creds-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #4caf50; margin-bottom: 14px; }
+    .cred-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .cred-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .cred-label { font-size: 0.78rem; color: rgba(255,255,255,0.4); font-weight: 600; }
+    .cred-value { font-size: 0.88rem; font-weight: 700; color: #fff; font-family: monospace; background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 6px; }
+
+    /* CHECKLIST */
+    .checklist { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px 22px; }
+    .checklist-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.35); margin-bottom: 14px; }
+    .check-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+    .check-item:last-child { margin-bottom: 0; }
+    .check-box { width: 18px; height: 18px; border: 1.5px solid rgba(255,255,255,0.2); border-radius: 4px; flex-shrink: 0; margin-top: 1px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .check-box.done { background: #4caf50; border-color: #4caf50; }
+    .check-box.done::after { content: '✓'; color: #fff; font-size: 0.72rem; font-weight: 800; }
+    .check-text { font-size: 0.84rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+    .check-text strong { color: #fff; }
+
+    /* FILES */
+    .files-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .file-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 16px; }
+    .file-name { font-size: 0.82rem; font-weight: 700; font-family: monospace; color: #c8e63c; margin-bottom: 4px; }
+    .file-desc { font-size: 0.74rem; color: rgba(255,255,255,0.4); line-height: 1.4; }
+
+    .note { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); border-radius: 10px; padding: 14px 16px; font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 1.6; }
+    .note strong { color: #f59e0b; }
+
+    footer { margin-top: 48px; text-align: center; font-size: 0.75rem; color: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="badge">🎾 Beta Test #2</div>
+  <h1>Liveball with <span>Erik</span><br>— Admin Handoff</h1>
+  <p class="intro">Hey! Here's everything you need to run the beta test as admin. Open the files locally in your browser — no internet needed, it all runs on your computer.</p>
+
+  <!-- FILES -->
+  <div class="section">
+    <div class="section-label">Files included</div>
+    <div class="files-grid">
+      <div class="file-card">
+        <div class="file-name">index.html</div>
+        <div class="file-desc">Home page — links to booking & lessons</div>
+      </div>
+      <div class="file-card">
+        <div class="file-name">liveball-booking.html</div>
+        <div class="file-desc">Main booking page players will use</div>
+      </div>
+      <div class="file-card">
+        <div class="file-name">private-lessons.html</div>
+        <div class="file-desc">Private lesson request page</div>
+      </div>
+      <div class="file-card">
+        <div class="file-name">archive.html</div>
+        <div class="file-desc">Past sessions — admin only</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREDENTIALS -->
+  <div class="section">
+    <div class="section-label">Your admin credentials</div>
+    <div class="creds">
+      <div class="creds-title">🔐 Login Details</div>
+      <div class="cred-row">
+        <span class="cred-label">Admin Password</span>
+        <span class="cred-value">silvererik27</span>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Admin button</span>
+        <span class="cred-value">⚙️ Admin (top right)</span>
+      </div>
+      <div class="cred-row">
+        <span class="cred-label">Archive page</span>
+        <span class="cred-value">archive.html</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW TO START -->
+  <div class="section">
+    <div class="section-label">How to run the beta test</div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Open liveball-booking.html in your browser</div>
+        <div class="step-desc">Just double-click the file — it'll open in Chrome, Safari, or Firefox. Keep all 4 files in the same folder.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Log in as admin</div>
+        <div class="step-desc">Click <code>⚙️ Admin</code> in the top right and enter the password <code>silvererik27</code> to access the admin panel.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Add a test session</div>
+        <div class="step-desc">In the admin panel, create a session with today's date and a time a few minutes from now — so you can test the auto-archive.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Test booking as a player</div>
+        <div class="step-desc">Click <code>← Back to site</code>, pick the session, fill in your details, and submit. Check that you get the confirmation screen.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Try the roster feature</div>
+        <div class="step-desc">Go back to admin → turn on Roster Visibility → go back to the player view and expand a session card to see who's in.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Check the archive</div>
+        <div class="step-desc">Open <code>archive.html</code> directly. Sessions move here automatically 24 hrs after they end. For testing, you can set a session to yesterday's date and reload the booking page to trigger it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BETA CHECKLIST -->
+  <div class="section">
+    <div class="section-label">Beta test checklist</div>
+    <div class="checklist">
+      <div class="checklist-title">Things to try & report back on</div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Adding a session</strong> — does it show up correctly on the player side?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Booking a spot</strong> — does the spot count update after booking?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Roster toggle</strong> — can you turn it on/off and does it update instantly?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Roster password</strong> — does locking/unlocking full names work?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Day-of payment checker</strong> — can you tap players to mark them paid?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Archive page</strong> — does it load correctly and show session details?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>CSV export</strong> — does the download work?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Liveball Music button</strong> — does the Spotify link open correctly?</div></div>
+      <div class="check-item"><div class="check-box" onclick="this.classList.toggle('done')"></div><div class="check-text"><strong>Mobile</strong> — try it on your phone and note anything that looks off.</div></div>
+    </div>
+  </div>
+
+  <!-- NOTE -->
+  <div class="note">
+    <strong>⚠️ Heads up:</strong> All data is saved in your browser only — nothing is shared between devices. So your test bookings won't show up on Erik's computer and vice versa. This is just for testing the UI and flow.
+  </div>
+
+  <footer>Tennis with Erik · Beta Test #2 · Keep this file confidential</footer>
+</div>
+</body>
+</html>

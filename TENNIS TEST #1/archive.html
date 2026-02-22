@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Session Archive — Liveball with Erik</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f4f2; color: #1a1a1a; min-height: 100vh; }
+
+    /* LOGIN */
+    .gate { position: fixed; inset: 0; background: #f4f4f2; display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 24px; }
+    .gate-box { background: #fff; border-radius: 20px; padding: 48px 40px; max-width: 360px; width: 100%; text-align: center; border: 1.5px solid #e8e8e8; box-shadow: 0 8px 40px rgba(0,0,0,0.08); }
+    .gate-icon { font-size: 2.5rem; margin-bottom: 16px; }
+    .gate-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 8px; }
+    .gate-box p { font-size: 0.85rem; color: #999; margin-bottom: 24px; line-height: 1.6; }
+    .gate-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 0.95rem; font-family: inherit; outline: none; text-align: center; margin-bottom: 10px; transition: border-color 0.2s; }
+    .gate-input:focus { border-color: #4caf50; }
+    .gate-input.error { border-color: #ef4444; animation: shake 0.3s ease; }
+    .gate-btn { width: 100%; padding: 12px; background: #1a1a1a; color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+    .gate-btn:hover { background: #333; }
+    .gate-err { color: #ef4444; font-size: 0.8rem; margin-bottom: 10px; display: none; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+    /* HEADER */
+    header { background: #1a1a1a; color: #fff; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .header-left h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; }
+    .header-left .sub { font-size: 0.78rem; color: rgba(255,255,255,0.4); margin-top: 3px; }
+    .header-btns { display: flex; gap: 8px; }
+    .back-btn { background: #333; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; transition: background 0.2s; }
+    .back-btn:hover { background: #444; }
+    .export-btn { background: #4caf50; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+    .export-btn:hover { background: #43a047; }
+
+    /* STATS BAR */
+    .stats-bar { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 20px 40px; display: flex; gap: 40px; flex-wrap: wrap; }
+    .stat { }
+    .stat-num { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; color: #1a1a1a; }
+    .stat-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #bbb; margin-top: 1px; }
+
+    /* FILTERS */
+    .filters { padding: 20px 40px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .filter-label { font-size: 0.75rem; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-btn { padding: 6px 14px; border: 1.5px solid #e8e8e8; border-radius: 100px; background: #fff; font-size: 0.78rem; font-weight: 600; cursor: pointer; font-family: inherit; color: #666; transition: all 0.15s; }
+    .filter-btn:hover { border-color: #4caf50; color: #2e7d32; }
+    .filter-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+    .search-input { padding: 7px 13px; border: 1.5px solid #e8e8e8; border-radius: 100px; font-size: 0.82rem; font-family: inherit; outline: none; background: #fff; width: 200px; }
+    .search-input:focus { border-color: #4caf50; }
+
+    /* MAIN */
+    .main { max-width: 960px; margin: 0 auto; padding: 24px 40px 60px; }
+
+    .empty-state { text-align: center; padding: 80px 24px; color: #aaa; }
+    .empty-state .big { font-size: 3rem; margin-bottom: 16px; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+    /* SESSION ARCHIVE CARD */
+    .archive-card { background: #fff; border: 1.5px solid #e8e8e8; border-radius: 16px; margin-bottom: 18px; overflow: hidden; }
+    .archive-card-header { padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; cursor: pointer; user-select: none; }
+    .archive-card-header:hover { background: #fafaf9; }
+    .ah-left { flex: 1; }
+    .ah-session-name { font-size: 1rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 3px; }
+    .ah-date { font-size: 0.78rem; color: #999; margin-bottom: 8px; }
+    .ah-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .ah-pill { font-size: 0.7rem; font-weight: 700; padding: 3px 9px; border-radius: 100px; }
+    .pill-green { background: #eafbea; color: #2e7d32; }
+    .pill-blue { background: #f0f4ff; color: #3b5bdb; }
+    .pill-yellow { background: #fffbea; color: #92400e; }
+    .pill-grey { background: #f4f4f2; color: #888; }
+    .ah-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .ah-headcount { text-align: right; }
+    .ah-headcount .num { font-size: 1.4rem; font-weight: 800; color: #1a1a1a; }
+    .ah-headcount .lbl { font-size: 0.68rem; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+    .ah-chevron { color: #bbb; transition: transform 0.25s; font-size: 1rem; }
+    .archive-card.open .ah-chevron { transform: rotate(180deg); }
+
+    /* EXPANDED BODY */
+    .archive-body { display: none; border-top: 1px solid #f0f0f0; }
+    .archive-card.open .archive-body { display: block; }
+
+    .ab-section { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; }
+    .ab-section:last-child { border-bottom: none; }
+    .ab-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #bbb; margin-bottom: 14px; }
+
+    /* ROSTER TABLE */
+    .roster-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .roster-table th { text-align: left; padding: 6px 10px; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px; color: #bbb; font-weight: 700; border-bottom: 1px solid #f0f0f0; }
+    .roster-table td { padding: 9px 10px; border-bottom: 1px solid #f9f9f7; color: #333; vertical-align: middle; }
+    .roster-table tr:last-child td { border-bottom: none; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; }
+    .tag-venmo { background: #f0f4ff; color: #3b5bdb; }
+    .tag-arrival { background: #fffbea; color: #92400e; }
+    .tag-skill { background: #f4f4f2; color: #555; }
+    .paid-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; }
+    .paid-chip.yes { background: #eafbea; color: #2e7d32; }
+    .paid-chip.no { background: #ffeaea; color: #c62828; }
+    .paid-chip.unk { background: #f4f4f2; color: #aaa; }
+
+    /* PAYMENT SUMMARY */
+    .pay-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .pay-box { background: #f9f9f7; border-radius: 10px; padding: 14px 16px; }
+    .pay-box .num { font-size: 1.3rem; font-weight: 800; margin-bottom: 2px; }
+    .pay-box .lbl { font-size: 0.72rem; color: #aaa; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .pay-box.green .num { color: #2e7d32; }
+    .pay-box.blue .num { color: #3b5bdb; }
+    .pay-box.yellow .num { color: #92400e; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 11px 22px; border-radius: 100px; font-size: 0.84rem; font-weight: 600; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 9999; white-space: nowrap; }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 620px) {
+      header { padding: 20px; }
+      .stats-bar { padding: 16px 20px; gap: 24px; }
+      .filters { padding: 16px 20px; }
+      .main { padding: 16px 20px 48px; }
+      .archive-card-header { padding: 16px 18px; }
+      .pay-summary { grid-template-columns: 1fr 1fr; }
+      .ah-headcount { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN GATE -->
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <div class="gate-icon">📁</div>
+    <h2>Session Archive</h2>
+    <p>This page is for Erik only. Enter your admin password to view past sessions.</p>
+    <div class="gate-err" id="gateErr">Wrong password — try again.</div>
+    <input class="gate-input" id="gateInput" type="password" placeholder="Admin password"
+      onkeydown="if(event.key==='Enter')checkLogin()" />
+    <button class="gate-btn" onclick="checkLogin()">Enter →</button>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-left">
+    <h1>📁 Session Archive</h1>
+    <div class="sub">Past sessions are automatically moved here 24 hrs after they end</div>
+  </div>
+  <div class="header-btns">
+    <a class="back-btn" href="liveball-booking.html">← Back to booking</a>
+    <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+  </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-num" id="statSessions">—</div>
+    <div class="stat-label">Sessions</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="statPlayers">—</div>
+    <div class="stat-label">Total Players</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="statRevenue">—</div>
+    <div class="stat-label">Est. Revenue</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="statVenmo">—</div>
+    <div class="stat-label">Venmo Bookings</div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <span class="filter-label">Filter:</span>
+  <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+  <button class="filter-btn" onclick="setFilter('month', this)">This Month</button>
+  <button class="filter-btn" onclick="setFilter('last30', this)">Last 30 Days</button>
+  <input class="search-input" id="searchInput" placeholder="🔍 Search by name..." oninput="renderArchive()" />
+</div>
+
+<!-- MAIN -->
+<div class="main" id="main"></div>
+
+<script>
+  const PASS = 'silvererik27'; // ← must match liveball-booking.html
+  const ARCHIVE_KEY = 'lbe_archive';
+
+  let archive = [];
+  let activeFilter = 'all';
+
+  // ── LOGIN ──
+  function checkLogin() {
+    const val = document.getElementById('gateInput').value;
+    if(val === PASS) {
+      document.getElementById('gate').style.display = 'none';
+      loadAndRender();
+    } else {
+      const el = document.getElementById('gateInput');
+      el.classList.add('error');
+      document.getElementById('gateErr').style.display = 'block';
+      el.value = '';
+      setTimeout(()=>el.classList.remove('error'), 400);
+    }
+  }
+
+  // ── LOAD ──
+  function loadAndRender() {
+    try { archive = JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]'); }
+    catch(e) { archive = []; }
+    // Sort newest first
+    archive.sort((a,b) => new Date(b.date+' '+b.time) - new Date(a.date+' '+a.time));
+    renderStats();
+    renderArchive();
+  }
+
+  // ── STATS ──
+  function renderStats() {
+    const totalPlayers = archive.reduce((s,a)=>(s + (a.attendees||[]).length), 0);
+    const totalRevenue = archive.reduce((s,a)=>(s + ((a.attendees||[]).length * (a.price||0))), 0);
+    const totalVenmo = archive.reduce((s,a)=>(s + (a.attendees||[]).filter(b=>b.pay==='venmo').length), 0);
+    document.getElementById('statSessions').textContent = archive.length;
+    document.getElementById('statPlayers').textContent = totalPlayers;
+    document.getElementById('statRevenue').textContent = '$' + totalRevenue;
+    document.getElementById('statVenmo').textContent = totalVenmo;
+  }
+
+  // ── FILTER ──
+  function setFilter(f, btn) {
+    activeFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderArchive();
+  }
+
+  function filteredArchive() {
+    const search = (document.getElementById('searchInput').value || '').toLowerCase();
+    const now = new Date();
+    return archive.filter(a => {
+      // Date filter
+      const d = new Date(a.date);
+      if(activeFilter === 'month' && (d.getMonth()!==now.getMonth() || d.getFullYear()!==now.getFullYear())) return false;
+      if(activeFilter === 'last30' && (now-d > 30*24*60*60*1000)) return false;
+      // Search filter
+      if(search) {
+        const nameMatch = (a.attendees||[]).some(b=>
+          (b.fname+' '+b.lname).toLowerCase().includes(search) ||
+          (b.email||'').toLowerCase().includes(search)
+        );
+        const sessionMatch = (a.name||'').toLowerCase().includes(search);
+        if(!nameMatch && !sessionMatch) return false;
+      }
+      return true;
+    });
+  }
+
+  // ── RENDER ──
+  function renderArchive() {
+    const main = document.getElementById('main');
+    const data = filteredArchive();
+
+    if(!data.length) {
+      main.innerHTML = `<div class="empty-state">
+        <div class="big">📭</div>
+        <p>${archive.length === 0
+          ? 'No archived sessions yet.<br>Sessions move here automatically 24 hours after they end.'
+          : 'No sessions match your current filter.'
+        }</p>
+      </div>`;
+      return;
+    }
+
+    main.innerHTML = data.map((s,i) => buildCard(s, i)).join('');
+  }
+
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function fmtDate(d) {
+    const [y,m,day] = d.split('-').map(Number);
+    const dt = new Date(y,m-1,day);
+    return `${DAYS[dt.getDay()]}, ${MONTHS[m-1]} ${day}, ${y}`;
+  }
+  function fmtTime(t) {
+    const [h,m] = t.split(':').map(Number);
+    return `${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+  }
+
+  function buildCard(s, i) {
+    const attendees = s.attendees || [];
+    const count = attendees.length;
+    const venmoCount = attendees.filter(b=>b.pay==='venmo').length;
+    const arrivalCount = attendees.filter(b=>b.pay==='arrival').length;
+    const paidCount = attendees.filter(b=>b.payConfirmed===true).length;
+    const revenue = count * (s.price||0);
+
+    const rosterRows = attendees.length ? attendees.map(b=>{
+      const paidStatus = b.payConfirmed===true ? '<span class="paid-chip yes">✅ Paid</span>'
+        : b.payConfirmed===false ? '<span class="paid-chip no">❌ Not paid</span>'
+        : '<span class="paid-chip unk">— Unknown</span>';
+      return `<tr>
+        <td><strong>${b.fname} ${b.lname}</strong></td>
+        <td>${b.email}</td>
+        <td>${b.phone||'—'}</td>
+        <td><span class="tag tag-skill">${b.skill||'—'}</span></td>
+        <td><span class="tag tag-${b.pay}">${b.pay==='venmo'?'💸 Venmo':'📍 Arrival'}</span></td>
+        <td>${paidStatus}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="6" style="text-align:center;color:#ccc;padding:20px;">No bookings recorded for this session.</td></tr>`;
+
+    return `
+    <div class="archive-card" id="ac-${i}">
+      <div class="archive-card-header" onclick="toggleCard(${i})">
+        <div class="ah-left">
+          <div class="ah-session-name">${s.name || 'Liveball Session'}</div>
+          <div class="ah-date">${fmtDate(s.date)} · ${fmtTime(s.time)}</div>
+          <div class="ah-pills">
+            <span class="ah-pill pill-green">${count} / ${s.max} attended</span>
+            ${s.price ? `<span class="ah-pill pill-blue">$${revenue} est. revenue</span>` : ''}
+            ${venmoCount ? `<span class="ah-pill pill-blue">${venmoCount} Venmo</span>` : ''}
+            ${arrivalCount ? `<span class="ah-pill pill-yellow">${arrivalCount} Arrival</span>` : ''}
+            ${paidCount ? `<span class="ah-pill pill-green">${paidCount} confirmed paid</span>` : ''}
+          </div>
+        </div>
+        <div class="ah-right">
+          <div class="ah-headcount">
+            <div class="num">${count}</div>
+            <div class="lbl">Players</div>
+          </div>
+          <div class="ah-chevron">▾</div>
+        </div>
+      </div>
+      <div class="archive-body">
+        <!-- PAYMENT SUMMARY -->
+        <div class="ab-section">
+          <div class="ab-title">💰 Payment Breakdown</div>
+          <div class="pay-summary">
+            <div class="pay-box green">
+              <div class="num">$${revenue}</div>
+              <div class="lbl">Est. Revenue</div>
+            </div>
+            <div class="pay-box blue">
+              <div class="num">${venmoCount}</div>
+              <div class="lbl">Venmo</div>
+            </div>
+            <div class="pay-box yellow">
+              <div class="num">${arrivalCount}</div>
+              <div class="lbl">Pay on Arrival</div>
+            </div>
+          </div>
+        </div>
+        <!-- ROSTER -->
+        <div class="ab-section">
+          <div class="ab-title">👥 Roster (${count} players)</div>
+          <table class="roster-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Skill</th><th>Payment</th><th>Confirmed</th></tr></thead>
+            <tbody>${rosterRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function toggleCard(i) {
+    document.getElementById('ac-'+i).classList.toggle('open');
+  }
+
+  // ── EXPORT CSV ──
+  function exportCSV() {
+    const data = filteredArchive();
+    if(!data.length) { toast('No sessions to export.'); return; }
+    const rows = [['Session','Date','Time','Player Name','Email','Phone','Skill','Payment','Confirmed Paid']];
+    data.forEach(s => {
+      (s.attendees||[]).forEach(b=>{
+        rows.push([
+          s.name||'Liveball Session', s.date, s.time,
+          `${b.fname} ${b.lname}`, b.email, b.phone||'',
+          b.skill||'', b.pay==='venmo'?'Venmo':'Pay on Arrival',
+          b.payConfirmed===true?'Yes':b.payConfirmed===false?'No':'Unknown'
+        ]);
+      });
+    });
+    const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'liveball-archive.csv';
+    a.click();
+    toast('✅ CSV exported!');
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'), 2600);
+  }
+</script>
+</body>
+</html>
